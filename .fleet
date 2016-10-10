@@ -1,0 +1,91 @@
+#!/bin/bash
+
+# auth will display (in http basic auth format) the first located auth credential in a given cluster.
+# N.B. Useful for curl.
+function auth {
+  colours
+  if [[ -z $1 ]]; then
+    echo "${amber_status} Usage - auth [url]"
+    cleanup_colours && return 1
+  fi
+
+  local credentials=$(ssh -t $1 'fleetctl ssh deployer etcdctl get /ft/_credentials/varnish/htpasswd' 2> /dev/null | sed -n 1'p' | tr ',' '\n')
+  for credential in ${credentials}; do
+    local username=$(echo ${credential} | cut -d: -f1)
+    local password=$(echo ${credential} | cut -d: -f2)
+    break
+  done
+
+  echo ${username}:${password}
+  cleanup_colours
+}
+
+# fcauth will display (in a human readable format) all the auth credentials for a given cluster.
+# N.B. Useful for validating setup credentials.
+function fcauth {
+  colours
+  if [[ -z $1 ]]; then
+    echo "${amber_status} Usage - fcauth [url]"
+    cleanup_colours && return 1
+  fi
+
+  local credentials=$(ssh -t $1 'fleetctl ssh deployer etcdctl get /ft/_credentials/varnish/htpasswd' 2> /dev/null | sed -n 1'p' | tr ',' '\n')
+  for credential in ${credentials}; do
+    local username=$(echo ${credential} | cut -d: -f1)
+    local password=$(echo ${credential} | cut -d: -f2)
+    printf "%3s %s %-25s %s\n" "" "${pale_green}${orb}${reset}" ${username} ${password}
+  done
+  cleanup_colours
+}
+
+# balance will report the number of fleet units on each machine in the cluster
+function balance {
+  colours
+  if [[ -z $1 ]]; then
+    echo "${amber_status} Usage - balance [url]"
+    cleanup_colours && return 1
+  fi
+
+  local machines=$(ssh -t $1 'fleetctl list-machines' 2> /dev/null | awk '{print $1}' | grep -v MACHINE | cut -d'.' -f1)
+  for machine in ${machines}; do
+    echo "${green_status} Machine: ${machine} Units: $(ssh -t $1 'fleetctl list-units | grep '$machine' | wc -l' 2> /dev/null)"
+  done
+
+  cleanup_colours
+}
+
+# coreos_version will report the OS version for each machine in a given cluster.
+function coreos_version {
+  colours
+  if [[ -z $1 ]]; then
+    echo "${amber_status} Usage - coreos [url]"
+    cleanup_colours && return 1
+  fi
+
+  local machines=$(ssh -t $1 'fleetctl list-machines' 2> /dev/null | awk '{print $1}' | grep -v MACHINE | cut -d'.' -f1)
+  for machine in ${machines}; do
+    echo "${green_status} Machine ID: ${machine}"
+    ssh -t $1 'fleetctl ssh '$machine' cat /etc/motd' 2> /dev/null | grep stable
+    echo ""
+  done
+  cleanup_colours
+}
+
+# ghostbuster checks a given cluster for 'ghost' containers (containers which do not have a fleet unit counterpart).
+# N.B. The splunk-forwarder is unique in that it creates two containers for one fleet unit; therefore these will always be reported.
+function ghostbuster {
+   colours
+   if [[ -z $1 ]]; then
+     echo "${amber_status} Usage - ghostbuster [url]"
+     cleanup_colours && return 1
+   fi
+
+   local machines=$(ssh -t $1 'fleetctl list-machines' 2> /dev/null | awk '{print $1}' | grep -v MACHINE | cut -d'.' -f1)
+   for machine in ${machines}; do
+      echo "${green_status} Machine: ${machine}"
+      ssh -t $1 "fleetctl ssh "$machine" docker ps --format {{.Names}} | awk -F_ '{print \$1}' | sed 's/.\{3\}$//' | xargs -I {} sh -c 'fleetctl list-units | grep running | grep "${machine}" | grep {} | wc -l | grep -q 0 && echo {}'" 2> /dev/null
+      echo ""
+   done
+
+   cleanup_colours
+}

@@ -1,0 +1,40 @@
+#!/bin/bash
+# Some nice colours to make usage prompts look tidy.
+
+# colours - sets up some easy variables for coloured prompts.
+function colours {
+   orb=$'\342\227\217'
+   reset=$(tput sgr0)
+   red=$(tput setaf 196)
+   blue=$(tput setaf 39)
+   light_green=$(tput setaf 77)
+   pale_green=$(tput setaf 190)
+   orange="$(tput setaf 166)"
+   yellow="$(tput setaf 11)"
+   purple=$(tput setaf 141)
+
+   bye=$'\xF0\x9F\x91\x8B'
+
+   red_status=${red}${orb}${reset}
+   amber_status=${orange}${orb}${reset}
+   green_status=${light_green}${orb}${reset}
+}
+
+# cleanup_colours - unsets the coloured variables to leave your environment tidy.
+function cleanup_colours {
+   unset orb
+   unset reset
+   unset red
+   unset blue
+   unset light_green
+   unset pale_green
+   unset orange
+   unset yellow
+   unset purple
+
+   unset bye
+
+   unset red_status
+   unset amber_status
+   unset green_status
+}
