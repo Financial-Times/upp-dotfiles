@@ -6,3 +6,4 @@ cd $(dirname $BASH_SOURCE)
 . ./.clusters
 . ./.fleet
 . ./.mongo
+. ./.git-helper

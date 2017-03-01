@@ -1,0 +1,7 @@
+#!/bin/bash
+
+alias clean='git fetch && git reset --hard && git clean -df'
+
+if [ -f ./bin/.git-completion.sh ]; then
+  . ./bin/.git-completion.sh
+fi
