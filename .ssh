@@ -1,0 +1,38 @@
+#!/bin/bash
+
+function sshp {
+  colours
+  if [[ -z $1 ]] || [[ -z $2 ]]; then
+    echo "${amber_status} Usage - sshp [up-tunnel-url] [port] [:optional service-name]"
+    cleanup_colours && return 1
+  fi
+
+  if [[ -z $3 ]]; then
+    local h=$(ssh $1 'hostname' 2> /dev/null)
+  else
+    local h=$(ssh $1 'fleetctl ssh '$3' hostname' 2> /dev/null)
+  fi
+
+  echo "${green_status} Forwarding ${h}:${2} onto localhost:9000"
+
+  ssh -L 9000:${h}:$2 $1
+  cleanup_colours
+}
+
+function remove_ssh {
+  colours
+  if [[ -z $1 ]]; then
+    echo "${amber_status} Usage - reset_ssh [up-tunnel-url]"
+    cleanup_colours && return 1
+  fi
+
+  sed -i.backup '/'${1}'/d' ~/.ssh/known_hosts
+
+  if diff ~/.ssh/known_hosts ~/.ssh/known_hosts.backup > /dev/null; then
+    echo "${red_status} Nothing was removed from the known_hosts file!"
+    cleanup_colours && return 1
+  fi
+
+  echo "${green_status} Reset ${1} in known_hosts."
+  cleanup_colours
+}
