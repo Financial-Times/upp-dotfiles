@@ -7,3 +7,4 @@ cd $(dirname $BASH_SOURCE)
 . ./.fleet
 . ./.mongo
 . ./.git-helper
+. ./.ssh
