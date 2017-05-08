@@ -5,6 +5,6 @@ cd $(dirname $BASH_SOURCE)
 . ./.colours
 . ./.clusters
 . ./.fleet
-. ./.mongo
 . ./.git-helper
 . ./.ssh
+. ./.mongo
