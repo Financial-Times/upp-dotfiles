@@ -89,3 +89,18 @@ function ghostbuster {
 
    cleanup_colours
 }
+
+function fctail {
+  colours
+  if [[ -z $1 ]] || [[ -z $2 ]]; then
+    echo "${amber_status} Usage - fctail [url] [service-name] [:optional lines]"
+    cleanup_colours && return 1
+  fi
+
+  local lines=${3:-200}
+
+  echo "${green_status} Connecting to $1"
+  ssh -t $1 'fleetctl journal -lines='$lines' -f '$2
+  echo "${red_status} Closed connection to $1"
+  cleanup_colours
+}

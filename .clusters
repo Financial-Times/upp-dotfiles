@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export dynpub="dynpub-uk-tunnel-up.ft.com"
+export dynpub="dynpub-eu-tunnel-up.ft.com"
 export semantic="semantic-uk-tunnel-up.ft.com"
 export preprod_uk="pre-prod-uk-tunnel-up.ft.com"
 export preprod_us="pre-prod-us-tunnel-up.ft.com"
